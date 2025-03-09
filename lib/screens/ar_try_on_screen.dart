@@ -94,9 +94,9 @@ class _ArTryOnScreenState extends State<ArTryOnScreen> with WidgetsBindingObserv
       // Show a user-friendly error message
       if (!_isDisposed && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('AR features are not supported on this device'),
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: Text('AR initialization error: $e'),
+            duration: const Duration(seconds: 3),
           ),
         );
         // Navigate back if AR is not supported
@@ -108,17 +108,28 @@ class _ArTryOnScreenState extends State<ArTryOnScreen> with WidgetsBindingObserv
       }
     }
   }
+
   void _applyFilter(String filterPath) {
     if (!_isInitialized || _isDisposed) return;
     
-    // Use proper asset path format
-    final effectFile = 'assets/filters/$filterPath';
-    deepArController.switchEffect(effectFile);
-    
-    if (!_isDisposed) {
-      setState(() {
-        _currentFilter = filterPath;
-      });
+    try {
+      // Use proper asset path format - this is critical for release mode
+      final effectFile = 'assets/filters/$filterPath';
+      print('Applying filter: $effectFile');
+      deepArController.switchEffect(effectFile);
+      
+      if (!_isDisposed) {
+        setState(() {
+          _currentFilter = filterPath;
+        });
+      }
+    } catch (e) {
+      print('Error applying filter: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to apply filter: $e')),
+        );
+      }
     }
   }
   @override
