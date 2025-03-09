@@ -19,32 +19,37 @@ class CustomDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
+            decoration: BoxDecoration(
+              color: Colors.grey[800],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 30,
-                  backgroundColor: Colors.white,
+                  backgroundColor: Colors.grey[300],
                   child: Icon(
                     Icons.person,
                     size: 40,
-                    color: AppColors.primary,
+                    color: Colors.grey[800],
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   isGuest ? 'Guest User' : 'John Doe',
-                  style: AppTextStyles.heading3.copyWith(
+                  style: TextStyle(
                     color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  isGuest ? 'Sign in to access all features' : 'john.doe@example.com',
-                  style: AppTextStyles.bodySmall.copyWith(
+                  isGuest
+                      ? 'Sign in to access all features'
+                      : 'john.doe@example.com',
+                  style: TextStyle(
                     color: Colors.white.withOpacity(0.8),
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -53,66 +58,43 @@ class CustomDrawer extends StatelessWidget {
           _buildDrawerItem(
             icon: Icons.home_outlined,
             title: 'Home',
-            onTap: () {
-              Navigator.pop(context);
-            },
+            onTap: () => Navigator.pop(context),
           ),
           _buildDrawerItem(
             icon: Icons.shopping_bag_outlined,
             title: 'Shop',
-            onTap: () {
-              Navigator.pop(context);
-              // Navigate to shop
-            },
+            onTap: () => Navigator.pop(context),
           ),
           _buildDrawerItem(
             icon: Icons.face_outlined,
             title: 'Virtual Try-On',
-            onTap: () {
-              Navigator.pop(context);
-              // Navigate to AR try-on
-            },
+            onTap: () => Navigator.pop(context),
           ),
           _buildDrawerItem(
             icon: Icons.favorite_border,
             title: 'Wishlist',
-            onTap: () {
-              Navigator.pop(context);
-              // Navigate to wishlist
-            },
+            onTap: () => Navigator.pop(context),
           ),
           _buildDrawerItem(
             icon: Icons.local_offer_outlined,
             title: 'Offers',
-            onTap: () {
-              Navigator.pop(context);
-              // Navigate to offers
-            },
+            onTap: () => Navigator.pop(context),
           ),
           _buildDrawerItem(
             icon: Icons.location_on_outlined,
             title: 'Store Locator',
-            onTap: () {
-              Navigator.pop(context);
-              // Navigate to store locator
-            },
+            onTap: () => Navigator.pop(context),
           ),
-          const Divider(),
+          const Divider(color: Colors.grey),
           _buildDrawerItem(
             icon: Icons.settings_outlined,
             title: 'Settings',
-            onTap: () {
-              Navigator.pop(context);
-              // Navigate to settings
-            },
+            onTap: () => Navigator.pop(context),
           ),
           _buildDrawerItem(
             icon: Icons.help_outline,
             title: 'Help & Support',
-            onTap: () {
-              Navigator.pop(context);
-              // Navigate to help
-            },
+            onTap: () => Navigator.pop(context),
           ),
           if (isGuest)
             _buildDrawerItem(
@@ -149,13 +131,17 @@ class CustomDrawer extends StatelessWidget {
     return ListTile(
       leading: Icon(
         icon,
-        color: AppColors.primary,
+        color: Colors.black,
       ),
       title: Text(
         title,
-        style: AppTextStyles.body,
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 16,
+        ),
       ),
       onTap: onTap,
+      hoverColor: Colors.grey[200],
     );
   }
 }

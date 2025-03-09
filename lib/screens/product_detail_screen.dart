@@ -30,64 +30,67 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: [
           // App Bar
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
-            backgroundColor: AppColors.primary,
+            backgroundColor: Colors.grey[100],
             flexibleSpace: FlexibleSpaceBar(
               background: Hero(
                 tag: 'product-${widget.product.id}',
                 child: Image.asset(
                   widget.product.imageUrl,
                   fit: BoxFit.cover,
+                  color: Colors.black, // Optional: Convert image to B&W
+                  colorBlendMode: BlendMode.saturation,
                 ),
               ),
             ),
             leading: IconButton(
               icon: const Icon(
                 Icons.arrow_back,
-                color: Colors.white,
+                color: Colors.black,
               ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
             ),
             actions: [
               IconButton(
                 icon: const Icon(
                   Icons.favorite_border,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
-                onPressed: () {
-                  // Add to wishlist
-                },
+                onPressed: () {},
               ),
               IconButton(
                 icon: const Icon(
                   Icons.share,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
-                onPressed: () {
-                  // Share product
-                },
+                onPressed: () {},
               ),
             ],
           ),
-          
+
           // Product Details
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,13 +101,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Expanded(
                         child: Text(
                           widget.product.name,
-                          style: AppTextStyles.heading2,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       Text(
                         '\$${widget.product.price.toStringAsFixed(2)}',
-                        style: AppTextStyles.heading2.copyWith(
-                          color: AppColors.primary,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -112,16 +121,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 8),
                   Text(
                     widget.product.category,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Color selection
                   Text(
                     'Color',
-                    style: AppTextStyles.heading3,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
@@ -132,13 +146,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       itemBuilder: (context, index) {
                         final color = widget.product.colors[index];
                         final isSelected = color == _selectedColor;
-                        
+
                         return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedColor = color;
-                            });
-                          },
+                          onTap: () => setState(() => _selectedColor = color),
                           child: Container(
                             margin: const EdgeInsets.only(right: 12),
                             padding: const EdgeInsets.symmetric(
@@ -146,18 +156,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: isSelected ? AppColors.primary : Colors.white,
+                              color:
+                                  isSelected ? Colors.black : Colors.grey[200],
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: isSelected ? AppColors.primary : AppColors.divider,
+                                color: isSelected
+                                    ? Colors.black
+                                    : Colors.grey[300]!,
                               ),
                             ),
                             child: Center(
                               child: Text(
                                 color,
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: isSelected ? Colors.white : AppColors.textPrimary,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                style: TextStyle(
+                                  color:
+                                      isSelected ? Colors.white : Colors.black,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  fontSize: 14,
                                 ),
                               ),
                             ),
@@ -167,19 +184,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Description
                   Text(
                     'Description',
-                    style: AppTextStyles.heading3,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     widget.product.description,
-                    style: AppTextStyles.body,
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 30),
-                  
+
                   // Try on button
                   SizedBox(
                     width: double.infinity,
@@ -189,13 +213,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ArTryOnScreen(
-                              filterPath: widget.product.arFilterPath,
+                              filterPath: widget.product.category
+                                      .toLowerCase()
+                                      .contains('sun')
+                                  ? 'sunglasses2.deepar'
+                                  : 'brightglasses.deepar',
                             ),
                           ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: Colors.black,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -207,18 +235,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                       label: Text(
                         'Try On with AR',
-                        style: AppTextStyles.button,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Add to cart button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Add to cart
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Added to cart (Demo)'),
@@ -227,15 +258,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
+                        backgroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: Colors.black,
+                            width: 2,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       child: Text(
                         'Add to Cart',
-                        style: AppTextStyles.button,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),

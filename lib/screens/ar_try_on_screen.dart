@@ -18,18 +18,55 @@ class ArTryOnScreen extends StatefulWidget {
   State<ArTryOnScreen> createState() => _ArTryOnScreenState();
 }
 
-class _ArTryOnScreenState extends State<ArTryOnScreen> {
-  final deepArController = DeepArController();
+class _ArTryOnScreenState extends State<ArTryOnScreen> with WidgetsBindingObserver {
+  late DeepArController deepArController;
   bool _isInitialized = false;
   String? _currentFilter;
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    deepArController = DeepArController();
     _initializeDeepAr();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Handle app lifecycle changes to properly manage camera resources
+    if (state == AppLifecycleState.resumed) {
+      if (_isInitialized && !_isDisposed) {
+        // Reinitialize when app is resumed
+        deepArController = DeepArController();
+        _initializeDeepAr();
+      }
+    } else if (state == AppLifecycleState.inactive || 
+              state == AppLifecycleState.paused || 
+              state == AppLifecycleState.detached) {
+      // Mark as not initialized when app is inactive/paused/detached
+      _isInitialized = false;
+    }
+  }
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _isInitialized = false;
+    WidgetsBinding.instance.removeObserver(this);
+    
+    // CORRECTED: Use destroy() instead of dispose()
+    if (deepArController.isInitialized) {
+      deepArController.destroy();
+    }
+    
+    super.dispose();
+  }
   Future<void> _initializeDeepAr() async {
+    if (_isDisposed || deepArController.isInitialized) return;
+    
+    // Add delay to ensure previous resources are released
+    await Future.delayed(const Duration(milliseconds: 500));
+    
     try {
       await deepArController.initialize(
         androidLicenseKey:
@@ -38,6 +75,8 @@ class _ArTryOnScreenState extends State<ArTryOnScreen> {
             '99e9502b20748e09932cdfcb467c89a73cbfbbdefca6143abb612d6a248058f460d858858000ea93',
         resolution: Resolution.high,
       );
+
+      if (_isDisposed) return;
 
       setState(() {
         _isInitialized = true;
@@ -53,7 +92,7 @@ class _ArTryOnScreenState extends State<ArTryOnScreen> {
     } catch (e) {
       print('DeepAR initialization error: $e');
       // Show a user-friendly error message
-      if (mounted) {
+      if (!_isDisposed && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('AR features are not supported on this device'),
@@ -62,29 +101,68 @@ class _ArTryOnScreenState extends State<ArTryOnScreen> {
         );
         // Navigate back if AR is not supported
         Future.delayed(const Duration(seconds: 1), () {
-          if (mounted) {
+          if (!_isDisposed && mounted) {
             Navigator.pop(context);
           }
         });
       }
     }
   }
-
   void _applyFilter(String filterPath) {
-    final effectFile = File('assets/filters/$filterPath').path;
+    if (!_isInitialized || _isDisposed) return;
+    
+    // Use proper asset path format
+    final effectFile = 'assets/filters/$filterPath';
     deepArController.switchEffect(effectFile);
-    setState(() {
-      _currentFilter = filterPath;
-    });
+    
+    if (!_isDisposed) {
+      setState(() {
+        _currentFilter = filterPath;
+      });
+    }
   }
-
   @override
-  void dispose() {
-    // No explicit disposal needed for deepArController
-    // This matches the approach in the working HomePage class
-    super.dispose();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          'Virtual Try-On',
+          style: AppTextStyles.heading3,
+        ),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: AppColors.textPrimary,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: _isInitialized
+          ? Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: _buildCameraPreview(),
+                  ),
+                ),
+                _buildFilterSelector(),
+                _buildControls(),
+              ],
+            )
+          : const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+              ),
+            ),
+    );
   }
-
   Widget _buildCameraPreview() {
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
@@ -104,7 +182,6 @@ class _ArTryOnScreenState extends State<ArTryOnScreen> {
       ),
     );
   }
-
   Widget _buildControls() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
@@ -152,7 +229,6 @@ class _ArTryOnScreenState extends State<ArTryOnScreen> {
       ),
     );
   }
-
   Widget _buildControlButton({
     required IconData icon,
     required String label,
@@ -188,7 +264,6 @@ class _ArTryOnScreenState extends State<ArTryOnScreen> {
       ),
     );
   }
-
   Widget _buildFilterSelector() {
     return SizedBox(
       height: 100,
@@ -249,7 +324,6 @@ class _ArTryOnScreenState extends State<ArTryOnScreen> {
       ),
     );
   }
-
   // Helper method to get a user-friendly name from the filter path
   String _getFilterName(String filterPath) {
     // Remove file extension and replace underscores with spaces
@@ -263,48 +337,5 @@ class _ArTryOnScreenState extends State<ArTryOnScreen> {
     });
 
     return capitalizedWords.join(' ');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Virtual Try-On',
-          style: AppTextStyles.heading3,
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: AppColors.textPrimary,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: _isInitialized
-          ? Column(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: _buildCameraPreview(),
-                  ),
-                ),
-                _buildFilterSelector(),
-                _buildControls(),
-              ],
-            )
-          : const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-              ),
-            ),
-    );
   }
 }

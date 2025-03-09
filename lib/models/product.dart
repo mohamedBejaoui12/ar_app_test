@@ -9,6 +9,7 @@ class Product {
   final bool isFeatured;
   final String category;
   final String arFilterPath;
+  final double? rating; // Added rating field
 
   Product({
     required this.id,
@@ -21,5 +22,6 @@ class Product {
     this.isFeatured = false,
     required this.category,
     required this.arFilterPath,
+    this.rating, // Optional rating parameter
   });
 }

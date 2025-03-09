@@ -7,16 +7,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Check if onboarding has been completed
-  final prefs = await SharedPreferences.getInstance();
-  final showOnboarding = prefs.getBool('onboarding_complete') != true;
+  // Always show onboarding by setting showOnboarding to true
+  // final prefs = await SharedPreferences.getInstance();
+  // final showOnboarding = prefs.getBool('onboarding_complete') != true;
+  final showOnboarding = true;
   
   runApp(MyApp(showOnboarding: showOnboarding));
 }
 
 class MyApp extends StatelessWidget {
   final bool showOnboarding;
-  
+
   const MyApp({
     super.key,
     required this.showOnboarding,

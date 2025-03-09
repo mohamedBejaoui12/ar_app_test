@@ -3,7 +3,6 @@ import 'package:ar_app/constants/app_colors.dart';
 import 'package:ar_app/constants/text_styles.dart';
 import 'package:ar_app/models/onboarding_item.dart';
 import 'package:ar_app/screens/login_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -19,25 +18,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<OnboardingItem> _onboardingItems = [
     OnboardingItem(
       title: 'Welcome to Loca Eye Wear',
-      description: 'Discover the perfect eyewear for your style and needs',
-      imageUrl: 'assets/onboarding/onboarding1.png',
+      description: 'Discover the perfect eyewear for your style and needs. Our collection offers a wide range of styles to suit every taste and preference. Whether you are looking for something classic or trendy, we have it all.',
     ),
     OnboardingItem(
       title: 'Try Before You Buy',
-      description: 'Use our AR technology to see how glasses look on your face',
-      imageUrl: 'assets/onboarding/onboarding2.png',
+      description: 'Use our AR technology to see how glasses look on your face. Experience the convenience of virtual try-on and find the perfect fit without leaving your home.',
     ),
     OnboardingItem(
       title: 'Wide Selection',
-      description: 'Browse through hundreds of frames and lenses',
-      imageUrl: 'assets/onboarding/onboarding3.png',
+      description: 'Browse through hundreds of frames and lenses. Our extensive catalog ensures that you will find the perfect pair to match your style and needs.',
     ),
   ];
 
-  void _completeOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboarding_complete', true);
-    
+  void _completeOnboarding() {
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -48,19 +41,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
+            // Logo at the top
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Image.asset(
+                'assets/logo.png',
+                height: 60,
+              ),
+            ),
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: _onboardingItems.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
+                onPageChanged: (index) => setState(() => _currentPage = index),
                 itemBuilder: (context, index) {
                   return _buildOnboardingPage(_onboardingItems[index]);
                 },
@@ -68,54 +65,58 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             Padding(
               padding: const EdgeInsets.all(24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
                   // Page indicator
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       _onboardingItems.length,
                       (index) => Container(
-                        margin: const EdgeInsets.only(right: 8),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
                         height: 8,
                         width: _currentPage == index ? 24 : 8,
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? AppColors.primary
-                              : AppColors.divider,
+                              ? Colors.black
+                              : Colors.grey[300],
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                     ),
                   ),
-                  
+                  const SizedBox(height: 24),
                   // Next button
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_currentPage < _onboardingItems.length - 1) {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      } else {
-                        _completeOnboarding();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_currentPage < _onboardingItems.length - 1) {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        } else {
+                          _completeOnboarding();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      child: Text(
+                        _currentPage < _onboardingItems.length - 1
+                            ? 'Next'
+                            : 'Get Started',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      _currentPage < _onboardingItems.length - 1
-                          ? 'Next'
-                          : 'Get Started',
-                      style: AppTextStyles.button,
                     ),
                   ),
                 ],
@@ -123,11 +124,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             TextButton(
               onPressed: _completeOnboarding,
-              child: Text(
+              child: const Text(
                 'Skip',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
               ),
             ),
@@ -144,20 +146,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(
-            item.imageUrl,
-            height: 300,
-          ),
           const SizedBox(height: 40),
           Text(
             item.title,
-            style: AppTextStyles.heading1,
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           Text(
             item.description,
-            style: AppTextStyles.body,
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
+            ),
             textAlign: TextAlign.center,
           ),
         ],

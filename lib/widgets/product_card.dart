@@ -1,5 +1,5 @@
-import 'package:ar_app/screens/product_detail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:ar_app/screens/product_detail_screen.dart';
 import 'package:ar_app/constants/app_colors.dart';
 import 'package:ar_app/constants/text_styles.dart';
 import 'package:ar_app/models/product.dart';
@@ -47,7 +47,7 @@ class ProductCard extends StatelessWidget {
               flex: 3,
               child: Stack(
                 children: [
-                  // Product image
+                  // Product image (desaturated)
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -58,11 +58,15 @@ class ProductCard extends StatelessWidget {
                       image: DecorationImage(
                         image: AssetImage(product.imageUrl),
                         fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          Colors.black,
+                          BlendMode.saturation,
+                        ),
                       ),
                     ),
                   ),
 
-                  // New badge
+                  // New badge (updated to monochrome)
                   if (product.isNew)
                     Positioned(
                       top: 8,
@@ -73,7 +77,7 @@ class ProductCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red,
+                          color: Colors.grey[800],
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Text(
@@ -87,7 +91,7 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
 
-                  // Try on button
+                  // Try on button (monochrome style)
                   Positioned(
                     top: 8,
                     right: 8,
@@ -95,11 +99,14 @@ class ProductCard extends StatelessWidget {
                       onPressed: onTryOn,
                       icon: const Icon(
                         Icons.face,
-                        color: AppColors.primary,
+                        color: Colors.black,
+                        size: 20,
                       ),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.white,
                         padding: const EdgeInsets.all(8),
+                        side: BorderSide(color: Colors.grey[300]!),
+                        shape: const CircleBorder(),
                       ),
                     ),
                   ),
@@ -107,11 +114,9 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            // Product details - Fixed height with padding to prevent overflow
+            // Product details
             Container(
-              height: isHorizontal
-                  ? 95
-                  : 100, // Slightly increased height for horizontal layout
+              height: isHorizontal ? 95 : 100,
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,11 +124,10 @@ class ProductCard extends StatelessWidget {
                 children: [
                   Text(
                     product.name,
-                    style: AppTextStyles.bodySmall.copyWith(
+                    style: TextStyle(
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontSize: isHorizontal
-                          ? 12
-                          : 14, // Smaller font for horizontal layout
+                      fontSize: isHorizontal ? 12 : 14,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -131,48 +135,38 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     product.category,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: isHorizontal
-                          ? 10
-                          : 12, // Smaller font for horizontal layout
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: isHorizontal ? 10 : 12,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const Spacer(),
-                  // Price and add button row with padding to prevent overflow
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        bottom: 4), // Increased bottom padding
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${product.price.toStringAsFixed(2)} DT',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                            fontSize: isHorizontal
-                                ? 11
-                                : 13, // Smaller font for horizontal layout
-                          ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '\$${product.price.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: isHorizontal ? 11 : 13,
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(
-                              5), // Slightly smaller padding
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 14, // Smaller icon size
-                          ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ],
-                    ),
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
